@@ -1,6 +1,8 @@
 #include <iostream>
 #include "vector_2d.h"
-// #include "GLFW/glfw3.h"
+
+#include "glad/gl.h"
+#include <GLFW/glfw3.h>
 
 class Line
 {
