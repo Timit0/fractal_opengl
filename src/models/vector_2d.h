@@ -1,4 +1,6 @@
-class Vector2D
+#include "vector.h"
+
+class Vector2D : public Vector
 {
 public:
     float x;
@@ -6,4 +8,6 @@ public:
 
     Vector2D();
     Vector2D(float x, float y);
+
+    float get_norme() override;
 };
