@@ -1,5 +1,8 @@
+#ifndef LINE_H
+#define LINE_H
+
 #include <iostream>
-#include "vector_2d.h"
+#include "vector/vector_2d.h"
 
 #include "glad/gl.h"
 #include <GLFW/glfw3.h>
@@ -10,9 +13,12 @@ public:
     Line();
     Line(Vector2D start, Vector2D end);
     ~Line();
-    void Draw();
+    void draw();
+    Vector2D get_start_vector();
+    Vector2D get_end_vector();
 
 protected:
     Vector2D start;
     Vector2D end;
 };
+#endif

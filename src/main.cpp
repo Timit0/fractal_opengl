@@ -6,7 +6,9 @@
 #include <chrono>
 #include <stdio.h>
 #include <stdlib.h>
-#include "models/line.h"
+
+#include "models/line/line.h"
+#include "models/triangle/triangle.h"
 
 const float WIDTH = 1280;
 const float HEIGHT = 720;
@@ -59,9 +61,10 @@ int main()
 
 void update(double delta)
 {
-    Line *line = new Line(Vector2D(200, 100), Vector2D(100, 300));
-    line->Draw();
-    delete line;
+    Line *pLine = new Line(Vector2D(200, 100), Vector2D(100, 300));
+    pLine->draw();
+    std::cout << pLine->get_start_vector().x;
+    delete pLine;
 }
 
 void input()

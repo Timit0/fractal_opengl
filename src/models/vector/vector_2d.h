@@ -1,3 +1,6 @@
+#ifndef VECTOR_2D_H
+#define VECTOR_2D_H
+
 #include "vector.h"
 
 class Vector2D : public Vector
@@ -11,3 +14,4 @@ public:
 
     float get_norme() override;
 };
+#endif

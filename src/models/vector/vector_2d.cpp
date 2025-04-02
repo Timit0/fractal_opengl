@@ -10,5 +10,5 @@ Vector2D::Vector2D(float x, float y)
 
 float Vector2D::get_norme()
 {
-    return 2;
+    return sqrt(this->x * this->x + this->y * this->y);
 }

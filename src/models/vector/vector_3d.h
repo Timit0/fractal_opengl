@@ -1,3 +1,6 @@
+#ifndef VECTOR_3D_H
+#define VECTOR_3D_H
+
 #include "vector.h"
 
 class Vector3D : public Vector
@@ -12,3 +15,4 @@ public:
 
     float get_norme() override;
 };
+#endif

@@ -11,5 +11,5 @@ Vector3D::Vector3D(float *x, float *y, float *z)
 
 float Vector3D::get_norme()
 {
-    return 2;
+    return sqrt(*this->x * *this->x + *this->y * *this->y + *this->z * *this->z);
 }

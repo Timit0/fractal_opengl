@@ -23,7 +23,7 @@ Line::Line(Vector2D start, Vector2D end)
 
 Line::~Line() {};
 
-void Line::Draw()
+void Line::draw()
 {
     GLfloat vertices[] =
         {
@@ -75,4 +75,14 @@ void Line::Draw()
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+}
+
+Vector2D Line::get_start_vector()
+{
+    return this->start;
+}
+
+Vector2D Line::get_end_vector()
+{
+    return this->end;
 }
