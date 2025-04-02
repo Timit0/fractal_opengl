@@ -25,7 +25,16 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     src/models
     src/external_libs/glfw/include
     src/external_libs/glad/include
+    src/shaders
 )
+
+#Copy the vertex shader to the exe
+configure_file(${CMAKE_SOURCE_DIR}/src/shaders/vertex/SimpleVertexShader.vertexshader 
+               ${CMAKE_SOURCE_DIR}/bin/win/x64/SimpleVertexShader.vertexshader COPYONLY)
+
+#Copy the fragment shader to the exe
+configure_file(${CMAKE_SOURCE_DIR}/src/shaders/fragment/SimpleFragmentShader.fragmentshader 
+               ${CMAKE_SOURCE_DIR}/bin/win/x64/SimpleFragmentShader.fragmentshader COPYONLY)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC 
     glfw
