@@ -10,6 +10,7 @@
 
 #include "line/line.h"
 #include "triangle/triangle_2d.h"
+#include "settings/settings.h"
 
 const float WIDTH = 1280;
 const float HEIGHT = 720;
@@ -67,7 +68,23 @@ int main()
 
 void update(double delta)
 {
-    Triangle2D *pTriangle2D = new Triangle2D(Vector2D(-1, -1), Vector2D(1, -0.5), Vector2D(0, 1));
+    if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS)
+    {
+        if (Settings::zoom <= 1)
+        {
+            Settings::zoom += 0.01f;
+        }
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS)
+    {
+        if (Settings::zoom >= 0)
+        {
+            Settings::zoom -= 0.01f;
+        }
+    }
+
+    Triangle2D *pTriangle2D = new Triangle2D(Vector2D(Settings::zoom * -1, Settings::zoom * -1), Vector2D(Settings::zoom * 1, Settings::zoom * -1), Vector2D(0, Settings::zoom * 1));
     pTriangle2D->draw();
     delete pTriangle2D;
 }
