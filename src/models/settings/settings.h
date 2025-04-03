@@ -9,5 +9,6 @@ public:
     ~Settings();
 
     static float zoom;
+    static const float zoom_range;
 };
 #endif

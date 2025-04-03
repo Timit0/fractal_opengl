@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <direct.h>
 
-#include "line/line.h"
+#include "line/line_2d.h"
 #include "triangle/triangle_2d.h"
 #include "settings/settings.h"
 
@@ -47,6 +47,10 @@ int main()
 
     GLuint programID = load_shaders("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
 
+    // Creation of objects
+    Line2D *pLine2D = new Line2D(Vector2D(-0.01, -0.01), Vector2D(0.01, 0.01));
+    //
+
     while (running)
     {
         double time = glfwGetTime();
@@ -56,6 +60,11 @@ int main()
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glUseProgram(programID);
             update(deltaTime);
+
+            pLine2D->set_start(Vector2D(Settings::zoom * -1, Settings::zoom * -1));
+            pLine2D->set_end(Vector2D(Settings::zoom * 1, Settings::zoom * 1));
+            pLine2D->draw();
+
             draw();
             lastTime = time;
         }
@@ -72,7 +81,7 @@ void update(double delta)
     {
         if (Settings::zoom <= 1)
         {
-            Settings::zoom += 0.01f;
+            Settings::zoom += Settings::zoom_range;
         }
     }
 
@@ -80,13 +89,17 @@ void update(double delta)
     {
         if (Settings::zoom >= 0)
         {
-            Settings::zoom -= 0.01f;
+            Settings::zoom -= Settings::zoom_range;
         }
     }
 
-    Triangle2D *pTriangle2D = new Triangle2D(Vector2D(Settings::zoom * -1, Settings::zoom * -1), Vector2D(Settings::zoom * 1, Settings::zoom * -1), Vector2D(0, Settings::zoom * 1));
-    pTriangle2D->draw();
-    delete pTriangle2D;
+    // Triangle2D *pTriangle2D = new Triangle2D(Vector2D(Settings::zoom * -1, Settings::zoom * -1), Vector2D(Settings::zoom * 1, Settings::zoom * -1), Vector2D(0, Settings::zoom * 1));
+    // pTriangle2D->draw();
+    // delete pTriangle2D;
+
+    // Line2D *pLine2D = new Line2D(Vector2D(0, 0), Vector2D(50, 50));
+    // pLine2D->draw();
+    // delete pLine2D;
 }
 
 void input()
