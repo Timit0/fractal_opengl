@@ -12,18 +12,18 @@
 #include "triangle/triangle_2d.h"
 #include "settings/settings.h"
 #include "fractal/koch_curve.h"
-
-const float WIDTH = 1280;
-const float HEIGHT = 720;
+#include "app/app.h"
 
 const double MAX_FPS = 60;
 
 GLFWwindow *window;
 GLFWmonitor *monitor;
-bool running = true, fullscreen;
+bool running = true;
+
+App *app = new App();
 
 void update(double delta), input(), draw();
-GLuint load_shaders(const char *vertex_file_path, const char *fragment_file_path);
+static void cursor_position_callback(GLFWwindow *window, double xpos, double ypos);
 
 int main()
 {
@@ -31,7 +31,7 @@ int main()
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     if (!glfwInit())
         fprintf(stderr, "Failed to init GLFW\n");
-    window = glfwCreateWindow(WIDTH, HEIGHT, "Fractal", NULL, NULL);
+    window = glfwCreateWindow(app->WIDTH, app->HEIGHT, "Fractal", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "FAILED to open window" << std::endl;
@@ -41,18 +41,30 @@ int main()
     gladLoadGL(glfwGetProcAddress);
 
     monitor = glfwGetPrimaryMonitor();
-    running = true;
-    fullscreen = false;
+
+    app->set_window(window);
+    app->set_monitor(monitor);
+
+    if (app->get_fullscreen())
+    {
+        std::cout << "FULLSCREEN" << std::endl;
+        glfwSetWindowMonitor(window, monitor, 100, 100, app->WIDTH, app->HEIGHT, 0);
+    }
+    else
+    {
+        std::cout << "WINDOWED" << std::endl;
+        glfwSetWindowMonitor(window, nullptr, 100, 100, app->WIDTH, app->HEIGHT, 0);
+    }
 
     double lastTime = 0.0;
 
-    GLuint programID = load_shaders("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
+    GLuint programID = app->load_shaders("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
 
     // Creation of objects
-    KochCurve *kochCurve = new KochCurve(-0.5f, -0.5f, 0.5f, -0.5f, 1);
+    KochCurve *kochCurve = new KochCurve(-0.5f, 0.5f, 0.0f, 0.0f, 5);
     //
 
-    while (running)
+    while (!glfwWindowShouldClose(window))
     {
         double time = glfwGetTime();
         double deltaTime = time - lastTime;
@@ -93,6 +105,23 @@ void update(double delta)
     }
 }
 
+void d()
+{
+    if (window != NULL)
+    {
+        return;
+    }
+    app->toggle_fullscreen();
+    if (!app->get_fullscreen())
+    {
+        glfwSetWindowMonitor(window, nullptr, 100, 100, app->WIDTH, app->HEIGHT, 0);
+    }
+    else
+    {
+        glfwSetWindowMonitor(window, monitor, 100, 100, app->WIDTH, app->HEIGHT, 0);
+    }
+}
+
 void input()
 {
     glfwPollEvents();
@@ -101,13 +130,23 @@ void input()
         running = false;
         glfwSetWindowShouldClose(window, 1);
     }
-    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
-    {
-        if (!fullscreen)
-            glfwSetWindowMonitor(window, monitor, 0, 0, WIDTH, HEIGHT, 0);
-        if (fullscreen)
-            glfwSetWindowMonitor(window, NULL, 0, 0, WIDTH, HEIGHT, 0);
-    }
+
+    app->on_pressed_once(
+        []()
+        {
+            app->toggle_fullscreen();
+            if (!app->get_fullscreen())
+            {
+                glfwSetWindowMonitor(window, nullptr, 100, 100, app->WIDTH, app->HEIGHT, 0);
+            }
+            else
+            {
+                glfwSetWindowMonitor(window, monitor, 100, 100, app->WIDTH, app->HEIGHT, 0);
+            }
+        },
+        GLFW_KEY_F11);
+
+    glfwSetCursorPosCallback(window, cursor_position_callback);
 }
 
 void draw()
@@ -115,97 +154,7 @@ void draw()
     glfwSwapBuffers(window);
 }
 
-GLuint load_shaders(const char *vertex_file_path, const char *fragment_file_path)
+static void cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
 {
-    // Create the shaders
-    GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
-    GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
-
-    // Read the Vertex Shader code from the file
-    std::string VertexShaderCode;
-    std::ifstream VertexShaderStream(vertex_file_path, std::ios::in);
-    if (VertexShaderStream.is_open())
-    {
-        std::stringstream sstr;
-        sstr << VertexShaderStream.rdbuf();
-        VertexShaderCode = sstr.str();
-        VertexShaderStream.close();
-    }
-    else
-    {
-        printf("Impossible to open %s. Are you in the right directory ? Don't forget to read the FAQ !\n", vertex_file_path);
-        getchar();
-        return 0;
-    }
-
-    // Read the Fragment Shader code from the file
-    std::string FragmentShaderCode;
-    std::ifstream FragmentShaderStream(fragment_file_path, std::ios::in);
-    if (FragmentShaderStream.is_open())
-    {
-        std::stringstream sstr;
-        sstr << FragmentShaderStream.rdbuf();
-        FragmentShaderCode = sstr.str();
-        FragmentShaderStream.close();
-    }
-
-    GLint Result = GL_FALSE;
-    int InfoLogLength;
-
-    // Compile Vertex Shader
-    printf("Compiling shader : %s\n", vertex_file_path);
-    char const *VertexSourcePointer = VertexShaderCode.c_str();
-    glShaderSource(VertexShaderID, 1, &VertexSourcePointer, NULL);
-    glCompileShader(VertexShaderID);
-
-    // Check Vertex Shader
-    glGetShaderiv(VertexShaderID, GL_COMPILE_STATUS, &Result);
-    glGetShaderiv(VertexShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-    if (InfoLogLength > 0)
-    {
-        std::vector<char> VertexShaderErrorMessage(InfoLogLength + 1);
-        glGetShaderInfoLog(VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
-        printf("%s\n", &VertexShaderErrorMessage[0]);
-    }
-
-    // Compile Fragment Shader
-    printf("Compiling shader : %s\n", fragment_file_path);
-    char const *FragmentSourcePointer = FragmentShaderCode.c_str();
-    glShaderSource(FragmentShaderID, 1, &FragmentSourcePointer, NULL);
-    glCompileShader(FragmentShaderID);
-
-    // Check Fragment Shader
-    glGetShaderiv(FragmentShaderID, GL_COMPILE_STATUS, &Result);
-    glGetShaderiv(FragmentShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-    if (InfoLogLength > 0)
-    {
-        std::vector<char> FragmentShaderErrorMessage(InfoLogLength + 1);
-        glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
-        printf("%s\n", &FragmentShaderErrorMessage[0]);
-    }
-
-    // Link the program
-    printf("Linking program\n");
-    GLuint ProgramID = glCreateProgram();
-    glAttachShader(ProgramID, VertexShaderID);
-    glAttachShader(ProgramID, FragmentShaderID);
-    glLinkProgram(ProgramID);
-
-    // Check the program
-    glGetProgramiv(ProgramID, GL_LINK_STATUS, &Result);
-    glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-    if (InfoLogLength > 0)
-    {
-        std::vector<char> ProgramErrorMessage(InfoLogLength + 1);
-        glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
-        printf("%s\n", &ProgramErrorMessage[0]);
-    }
-
-    glDetachShader(ProgramID, VertexShaderID);
-    glDetachShader(ProgramID, FragmentShaderID);
-
-    glDeleteShader(VertexShaderID);
-    glDeleteShader(FragmentShaderID);
-
-    return ProgramID;
+    // std::cout << "Position: (" << xpos << ":" << ypos << ")";
 }

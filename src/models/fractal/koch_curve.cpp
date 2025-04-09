@@ -24,5 +24,20 @@ void KochCurve::draw_fractal(float x1, float x2, float y1, float y2, int depth)
         return;
     }
 
-    draw_fractal(x1, x2, y1, y2, depth - 1);
+    float xA = x1 + (x2 - x1) / 3.0;
+    float yA = y1 + (y2 - y1) / 3.0;
+
+    float xB = x1 + 2.0 * (x2 - x1) / 3.0;
+    float yB = y1 + 2.0 * (y2 - y1) / 3.0;
+
+    float dx = xB - xA;
+    float dy = yB - yA;
+
+    float xPeak = (xA + xB) / 2.0 - sqrt(3) * (yB - yA) / 6.0;
+    float yPeak = (yA + yB) / 2.0 + sqrt(3) * (xB - xA) / 6.0;
+
+    draw_fractal(x1, xA, y1, yA, depth - 1);
+    draw_fractal(xA, xPeak, yA, yPeak, depth - 1);
+    draw_fractal(xPeak, xB, yPeak, yB, depth - 1);
+    draw_fractal(xB, x2, yB, y2, depth - 1);
 }

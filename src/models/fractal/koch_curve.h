@@ -2,7 +2,8 @@
 #define KOCH_CURVE_H
 
 #include "line/line_2d.h"
-#include <math.h>
+#include <cmath>
+#include <vector>
 
 class KochCurve
 {
